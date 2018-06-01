@@ -37,9 +37,8 @@ def gradient_decent(x,y):
         #print(pred_y)
         # pred_y 中的值为概率
         class_y = np.array([1 if i>0.5 else 0 for i in pred_y])
-        loss = sum([class_y[i]==y[i] for i in range(len(y))])
-        #print(loss)
-        loss_set.append(1-loss/len(x))
+        true_num = sum([class_y[i]==y[i] for i in range(len(y))])
+        loss_set.append(1-true_num/len(x))
         epoch_set.append(epoch)
     plt.plot(epoch_set,loss_set)
     plt.show()

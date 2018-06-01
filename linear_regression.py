@@ -1,7 +1,9 @@
 import numpy as np
-from matplotlib import pyplot as plt
 import random
 import copy
+import visdom
+
+
 
 # 随机创建一些初始x,y值,n:参数个数(特征数-1)
 def loadData(n):
@@ -28,11 +30,10 @@ def loadData(n):
 
     return x,noise_y
 
-def gradient_decent(x,noise_y,plot=False):
+def gradient_decent(x,noise_y):
     theta = np.random.uniform(size=[len(x)])
     lr = 0.001
-    loss_set = []
-    epoch_set = []
+    loss = 0
     for epoch in range(3000):
         pred_y = 0
         for i in range(len(x)):
@@ -44,16 +45,10 @@ def gradient_decent(x,noise_y,plot=False):
         # 开始梯度下降
         for i in range(len(theta)):
             theta[i] -= grad[i]*lr
-        temp_loss = sum((pred_y - noise_y)) / 100
         loss = sum((pred_y-noise_y)**2)/200
-        loss_set.append(loss)
-        epoch_set.append(epoch)
-    if(plot):
-        plt.plot(epoch_set, loss_set)
-        plt.xlabel('Iteration times')
-        plt.ylabel('Loss')
-        plt.show()
-    print("Gradient descent loss: %.4f" % loss_set[-1])
+        # 比收集好数据一次上传更消耗时间
+        viz.line(X=np.array([epoch]), Y=np.array([loss]), win='linear_regression', update='append' if epoch>0 else None, opts={'title':"loss-iteration times"})
+    print("Gradient descent loss: %.4f" % loss)
 
 def normal_equation(x,noise_y):
     # theta = (X.T*X).I*X.T*Y
@@ -71,5 +66,7 @@ def normal_equation(x,noise_y):
 
 if __name__ == '__main__':
     x,noise_y = loadData(8)
-    gradient_decent(x,noise_y,True)
+    viz = visdom.Visdom()
+    assert viz.check_connection()
+    gradient_decent(x,noise_y)
     normal_equation(x,noise_y)
